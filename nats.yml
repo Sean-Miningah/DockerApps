@@ -1,0 +1,40 @@
+services:
+  nats:
+    image: nats:2.14-alpine
+    container_name: nats
+    restart: unless-stopped
+    command: ["--js", "--store_dir", "/data", "--http_port", "8222"]
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+      - "6222:6222"
+    volumes:
+      - nats_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q http://127.0.0.1:8222/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  nui:
+    image: ghcr.io/nats-nui/nui:0.9.2
+    container_name: nui
+    restart: unless-stopped
+    volumes:
+      - nui_data:/db
+    ports:
+      - "31312:31311"
+    depends_on:
+      nats:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:31311/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  nats_data:
+  nui_data:
