@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  jaeger:
+    image: cr.jaegertracing.io/jaegertracing/jaeger:2.14.1
+    container_name: jaeger
+    # command: ["jaeger"]
+    ports:
+      - "16686:16686" # Jaeger UI
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
+    environment:
+      - JAEGER_STORAGE_TYPE=memory
+      - JAEGER_OTLP_ENABLED=false
+    restart: unless-stopped
